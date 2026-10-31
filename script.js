@@ -1,119 +1,16 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const chatWindow = document.getElementById("chatWindow");
-    const startChatBtn = document.getElementById("startChatBtn");
-    const chatControls = document.getElementById("chatControls");
-    const buttonRow = document.getElementById("buttonRow");
-    const inputRow = document.getElementById("inputRow");
-    const userInput = document.getElementById("userInput");
-    const sendBtn = document.getElementById("sendBtn");
-
-    let state = "idle";
-
-    function addMessage(text, sender = "bot") {
-        const msg = document.createElement("div");
-        msg.className = `message ${sender}`;
-        const bubble = document.createElement("div");
-        bubble.className = "bubble";
-        bubble.textContent = text;
-        msg.appendChild(bubble);
-        chatWindow.appendChild(msg);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-    }
-
-    function clearButtons() {
-        buttonRow.innerHTML = "";
-    }
-
-    function showInitialSequence() {
-        addMessage("مرحباً بسعادتكم في صفحة مركز الحاسب الآلي والشبكات بجامعة ظفار.");
-        addMessage("يشرّفنا أن نقدم لكم هذه الدعوة الرقمية الخاصة بمناسبة اليوم الوطني العُماني المجيد.");
-        setTimeout(() => {
-            askIfPresident();
-        }, 800);
-    }
-
-    function askIfPresident() {
-        addMessage("للتأكد من وصول الرسالة إلى الشخص المناسب، هل أنت سعادة الأستاذ الدكتور رئيس الجامعة؟");
-        clearButtons();
-
-        const yesBtn = document.createElement("button");
-        yesBtn.className = "chat-btn";
-        yesBtn.textContent = "نعم، هذا أنا";
-        yesBtn.addEventListener("click", () => {
-            addMessage("نعم، هذا أنا", "user");
-            clearButtons();
-            askForName();
-        });
-
-        const noBtn = document.createElement("button");
-        noBtn.className = "chat-btn";
-        noBtn.textContent = "لا، لست أنا";
-        noBtn.addEventListener("click", () => {
-            addMessage("لا، لست أنا", "user");
-            clearButtons();
-            showGenericInvite();
-        });
-
-        buttonRow.appendChild(yesBtn);
-        buttonRow.appendChild(noBtn);
-    }
-
-    function askForName() {
-        state = "awaitingName";
-        addMessage("نرحّب بسعادتكم، تكرماً اكتب اسمك الأول للتأكيد.");
-        inputRow.classList.remove("hidden");
-        userInput.focus();
-    }
-
-    function showGenericInvite() {
-        state = "done";
-        addMessage("يسعدنا كذلك حضوركم ومشاركتكم في احتفال مركز الحاسب الآلي والشبكات باليوم الوطني العُماني.");
-        addMessage("يسرّنا أن نحيطكم علماً بأن المركز سيقيم احتفالاً خاصاً بهذه المناسبة في يوم الخميس 20 نوفمبر 2025 الساعة 9:00 صباحاً في مقر المركز، ونتطلع لمشاركتكم هذا الفرح الوطني.");
-    }
-
-    function handleNameSubmit() {
-        const name = userInput.value.trim();
-        if (!name) return;
-
-        addMessage(name, "user");
-        userInput.value = "";
-
-        inputRow.classList.add("hidden");
-        state = "done";
-
-        const normalized = name.replace(/\s+/g, "").toLowerCase();
-
-        if (normalized.includes("عامر") || normalized.includes("amer")) {
-            addMessage("أهلاً وسهلاً بسعادتكم البروفيسور عامر الرواس، رئيس جامعة ظفار.");
-            addMessage("يسعدنا في مركز الحاسب الآلي والشبكات أن ندعوكم لحضور احتفالنا باليوم الوطني العُماني، وذلك يوم الخميس 20 نوفمبر 2025 في تمام الساعة 9:00 صباحاً بمقر المركز.");
-            addMessage("وجودكم بيننا إضافة كبيرة لنا، ونتشرّف بمشاركتكم هذه المناسبة الوطنية الغالية على قلوبنا.");
-        } else {
-            addMessage("شرفٌ كبير لنا حضوركم الكريم.");
-            addMessage("نتشرف بدعوتكم لحضور احتفال مركز الحاسب الآلي والشبكات باليوم الوطني العُماني، وذلك يوم الخميس 20 نوفمبر 2025 الساعة 9:00 صباحاً في مقر المركز بجامعة ظفار.");
-        }
-
-        addMessage("مع خالص التقدير والاحترام، فريق عمل مركز الحاسب الآلي والشبكات.");
-    }
-
-    startChatBtn.addEventListener("click", () => {
-        chatWindow.innerHTML = "";
-        chatControls.classList.remove("hidden");
-        inputRow.classList.add("hidden");
-        clearButtons();
-        state = "chatting";
-        showInitialSequence();
-    });
-
-    sendBtn.addEventListener("click", () => {
-        if (state === "awaitingName") {
-            handleNameSubmit();
-        }
-    });
-
-    userInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && state === "awaitingName") {
-            e.preventDefault();
-            handleNameSubmit();
-        }
-    });
-});
+'use strict';
+// Optional AI backend. Leave empty for the fully working official-source FAQ mode.
+// The existing DhofarCare Worker is for home services: do NOT reuse it for university questions.
+const CONFIG = { API_URL: '' };
+const URLS={programs:'https://www.du.edu.om/programs-and-degrees-offered/',dates:'https://www.du.edu.om/ar/academic-calendar-2026-2027/',admissions:'https://www.du.edu.om/department-of-admission-registration-2/',fees:'https://www.du.edu.om/',foundation:'https://www.du.edu.om/ar/programs-and-degrees-offered/',contacts:'https://www.du.edu.om/contact-us/',news:'https://www.du.edu.om/ar/dhofar-university-opens-admissions-for-2026-2027/'};
+const labels={ar:{prototype:'مشروع توضيحي مستقل — ليس موقعًا رسميًا لجامعة ظفار',official:'الموقع الرسمي للجامعة ↗',brandSub:'دليلك الجامعي الذكي',navFeatures:'الخدمات',navChat:'المساعد الذكي',navSources:'المصادر الرسمية',askNow:'اسأل الآن',eyebrow:'المنصة الذكية للاستفسارات الجامعية',heroTitle:'كل ما تريد معرفته عن <em>جامعة ظفار</em> في مكان واحد',heroDesc:'اسأل عن التخصصات، التسجيل، متطلبات القبول والخدمات الجامعية، بالعربية أو الإنجليزية — مع روابط إلى المعلومات الرسمية.',startChat:'ابدأ المحادثة الآن ←',discover:'استكشف الخدمات',disclaimer:'نسخة توضيحية مستقلة؛ تأكد من المواعيد والرسوم لدى الجامعة مباشرة.',sectionTitle:'كيف نقدر نساعدك اليوم؟',sectionSub:'اختر موضوعًا أو اسأل المساعد مباشرة. جميع الخيارات تعمل.',bilingual:'العربية • English',topicPrograms:'التخصصات والبرامج',topicProgramsSub:'استكشف الكليات والدرجات',topicAdmission:'القبول والتسجيل',topicAdmissionSub:'المتطلبات والتقديم',topicDates:'مواعيد التسجيل',topicDatesSub:'التقويم والمواعيد الرسمية',topicFees:'الرسوم والمنح',topicFeesSub:'مصادر الرسوم والدعم',topicFoundation:'البرنامج التأسيسي',topicFoundationSub:'اختبارات تحديد المستوى',topicContacts:'التواصل والدعم',topicContactsSub:'الجهات والأرقام الرسمية',chatTag:'YOUR VIRTUAL UNIVERSITY GUIDE',chatTitle:'مساعد جامعي يتحدث بلغتك',chatDesc:'اكتب سؤالك بطريقة طبيعية. النموذج الأساسي يرد بمعلومات موثقة وأسئلة شائعة، ويمكن تفعيل Gemini للأسئلة المفتوحة من خلال خادم آمن.',mini1:'الرد بالعربية والإنجليزية',mini1s:'تبديل فوري للغة والتصميم',mini2:'روابط رسمية موثوقة',mini2s:'لا نخترع مواعيد أو شروط قبول',mini3:'إجابات جاهزة دون اشتراك',mini3s:'مع إمكانية تفعيل Gemini لاحقًا',privacy:'🔒 لا تشارك كلمة المرور أو رقم الهوية أو بياناتك الشخصية الحساسة داخل المحادثة.',prompt1:'ما التخصصات المتاحة؟',prompt2:'متى التسجيل؟',prompt3:'كم الرسوم؟',placeholder:'اكتب استفسارك هنا...',chatFoot:'الإجابات إرشادية وليست بديلًا عن إعلان الجامعة الرسمي.',sourcesTitle:'مصادرك الرسمية',sourcesSub:'روابط مباشرة لتأكيد التفاصيل المتغيرة.',sourcePrograms:'البرامج والدرجات',sourceCalendar:'التقويم الأكاديمي',sourceAdmissions:'دائرة القبول والتسجيل',sourceContact:'التواصل مع الجامعة',footerNotice:'نموذج مستقل للتوعية والإرشاد، غير تابع رسميًا لجامعة ظفار.'},en:{prototype:'Independent demonstration project — not an official Dhofar University site',official:'Official university website ↗',brandSub:'Your smart campus guide',navFeatures:'Services',navChat:'AI assistant',navSources:'Official sources',askNow:'Ask now',eyebrow:'YOUR SMART UNIVERSITY INFORMATION HUB',heroTitle:'Everything about <em>Dhofar University</em> in one place',heroDesc:'Ask about majors, applications, admission requirements and student services in English or Arabic, with links to official information.',startChat:'Start a conversation →',discover:'Explore topics',disclaimer:'Independent demo; always verify dates and fees with the university.',sectionTitle:'How can we help you?',sectionSub:'Choose a topic or ask your question. Every topic is interactive.',bilingual:'العربية • English',topicPrograms:'Majors & programs',topicProgramsSub:'Explore colleges and degrees',topicAdmission:'Admissions',topicAdmissionSub:'Requirements and applications',topicDates:'Registration dates',topicDatesSub:'Calendar and announcements',topicFees:'Tuition & scholarships',topicFeesSub:'Fees and support sources',topicFoundation:'Foundation program',topicFoundationSub:'Placement assessments',topicContacts:'Contact & help',topicContactsSub:'Official contact channels',chatTag:'YOUR VIRTUAL UNIVERSITY GUIDE',chatTitle:'A university assistant in your language',chatDesc:'Ask naturally. The built-in assistant answers documented FAQs and you can optionally connect Gemini through a secure backend for open-ended questions.',mini1:'Arabic and English',mini1s:'Instant language and layout switching',mini2:'Trusted official links',mini2s:'No invented dates or requirements',mini3:'Works with no subscription',mini3s:'Gemini can be enabled separately',privacy:'🔒 Never share passwords, ID numbers, or sensitive personal details in chat.',prompt1:'What majors are offered?',prompt2:'When is registration?',prompt3:'How much is tuition?',placeholder:'Type your question here...',chatFoot:'Guidance only; official university notices take precedence.',sourcesTitle:'Official sources',sourcesSub:'Direct links to verify changing information.',sourcePrograms:'Programs and degrees',sourceCalendar:'Academic calendar',sourceAdmissions:'Admissions department',sourceContact:'Contact the university',footerNotice:'Independent informational demo, not affiliated with Dhofar University.'}};
+const facts={ar:{programs:'تقدم جامعة ظفار برامج دبلوم وبكالوريوس ودراسات عليا في مجالات متعددة. تشمل الكليات المذكورة في صفحة البرامج: الآداب والعلوم التطبيقية، التجارة وإدارة الأعمال، الهندسة، والحقوق. تحقّق من القائمة المحدثة من المصدر الرسمي.',admissions:'للاستفسار عن القبول، راجع شروط القبول والبرامج في الموقع الرسمي، أو تواصل مع دائرة القبول والتسجيل. لا يمكن تأكيد أهلية متقدم أو قبول طلب من خلال هذا النموذج.',dates:'تُعلن فترات التسجيل في التقويم الأكاديمي. يوضح تقويم 2026–2027 فترة التسجيل الإلكتروني لفصل الخريف من 7 إلى 10 سبتمبر 2026، وبدء الدراسة في 13 سبتمبر 2026. هذه مواعيد تسجيل مقررات الفصل المنشورة، وليست بالضرورة المواعيد النهائية لتقديم الطلاب الجدد. للاطلاع على فرص القبول الحالية تحقق من إعلان الجامعة مباشرة.',fees:'تختلف الرسوم بحسب البرنامج وعدد الساعات ونوع القبول. لا أملك جدولًا معتمدًا ومحدثًا لكل تخصص، لذلك لن أذكر مبلغًا غير مؤكد. راجع الجامعة أو دائرة القبول لمعرفة الرسوم والمنح ذات الصلة.',foundation:'يوجد برنامج تأسيسي لمساعدة الطلبة على الاستعداد أكاديميًا. تتناول اختبارات تحديد المستوى الإنجليزية والرياضيات وتقنية المعلومات، وقد يحدد الأداء الحاجة إلى البرنامج أو الإعفاء منه وفق اللوائح.',contacts:'التواصل العام: 8001 8001. قسم التسجيل: 23237046 أو 23237048. للحصول على أرقام محدثة وأقسام أخرى راجع صفحة اتصل بنا. لا ترسل بياناتك الحساسة في المحادثة.',unknown:'أقدر أساعدك في استفسارات جامعة ظفار المتعلقة بالتخصصات والقبول والتسجيل والرسوم والبرنامج التأسيسي والتواصل. هذا النموذج يستخدم إجابات موثقة للأسئلة الشائعة فقط؛ للأسئلة المتخصصة راجع المصادر الرسمية أو فعّل Gemini من خلال الخادم الآمن.'},en:{programs:'Dhofar University offers diploma, bachelor and postgraduate study options. The published programs page lists Arts & Applied Sciences, Commerce & Business Administration, Engineering, and Law. Check the official list for the latest program-by-program details.',admissions:'For admission, review the current program requirements and contact the Admissions and Registration Department. This demo cannot determine your personal eligibility or confirm an admission decision.',dates:'The academic calendar publishes course registration periods. For fall 2026–27 it lists online registration on 7–10 September 2026 and classes starting 13 September 2026. These are published semester course-registration dates, not necessarily the application deadline for new applicants. Verify the latest admission announcements.',fees:'Tuition varies by program, credit load and admission category. I cannot verify a complete current fee schedule, so I will not invent amounts. Ask the university about the applicable tuition and scholarship options.',foundation:'The foundation program supports students preparing for university-level study. Placement testing covers English, mathematics and IT. Placement or exemption is governed by university policies.',contacts:'General enquiries: 8001 8001. Registration: 23237046 or 23237048. Visit the official contact page for other departments and updates. Do not share sensitive details in chat.',unknown:'I can help with common Dhofar University questions about programs, admission, registration dates, tuition, foundation studies and contacts. This demo has a verified FAQ mode; for less common questions, use the official links or enable Gemini via the secure backend.'}};
+let lang='ar';let busy=false;const history=[];const $=s=>document.querySelector(s);const messages=$('#messages');
+function linkFor(topic){return URLS[topic]||URLS.programs}
+function addMessage(kind,message,link){const b=document.createElement('div');b.className='bubble '+kind;b.textContent=message;if(link){const a=document.createElement('a');a.href=link;a.target='_blank';a.rel='noopener noreferrer';a.textContent=lang==='ar'?' \n↗ افتح المصدر الرسمي':' \n↗ View official source';b.appendChild(document.createElement('br'));b.appendChild(a)}messages.appendChild(b);messages.scrollTop=messages.scrollHeight;}
+function detectTopic(q){const s=q.toLowerCase();const patterns={dates:/متى|موعد|مواعيد|تقويم|بداية|ينتهي|registration date|when|deadline|calendar|start date|التسجيل متى/,fees:/رسوم|تكلف|سعر|منح|بعث|scholarship|tuition|fee|cost|price/,foundation:/تأسيس|فاونديشن|تحديد المستوى|foundation|placement|cps|english test/,contacts:/تواصل|اتصل|رقم|هاتف|بريد|إيميل|contact|phone|email|helpdesk/,admissions:/قبول|تقديم|شروط|التحاق|معدل|admission|apply|requirement|eligib/,programs:/تخصص|برنامج|كلية|دبلوم|بكالوريوس|ماجستير|هندسة|طب|حقوق|major|program|degree|college|engineering|law|business|master|bachelor/};for(const [k,re] of Object.entries(patterns))if(re.test(s))return k;return 'unknown'}
+function replyFAQ(topic){addMessage('bot',facts[lang][topic],topic!=='unknown'?linkFor(topic):URLS.programs)}
+async function ask(text,forcedTopic){if(busy)return;busy=true;$('#sendBtn').disabled=true;addMessage('user',text);const topic=forcedTopic||detectTopic(text);history.push({role:'user',text:text.slice(0,900)});try{if(CONFIG.API_URL){const res=await fetch(CONFIG.API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'chat',message:text.slice(0,900),history:history.slice(-8),language:lang})});const data=await res.json();if(!res.ok||!data.ok||typeof data.answer!=='string')throw Error(data.error||'AI not available');addMessage('bot',data.answer,topic!=='unknown'?linkFor(topic):undefined);history.push({role:'assistant',text:data.answer.slice(0,1500)})}else{replyFAQ(topic);history.push({role:'assistant',text:facts[lang][topic]})}}catch(e){addMessage('bot',(lang==='ar'?'تعذر الاتصال بخدمة الذكاء الاصطناعي حاليًا. إليك إجابة من الأسئلة الشائعة:\n':'AI is temporarily unavailable. Here is a documented FAQ answer:\n')+facts[lang][topic],linkFor(topic))}finally{busy=false;$('#sendBtn').disabled=false;$('#messageInput').focus()}}
+function greet(){messages.innerHTML='';history.length=0;addMessage('bot',lang==='ar'?'مرحبًا بك! 👋 أنا مساعد جامعي تجريبي للاستفسارات عن جامعة ظفار. اسأل عن التخصصات أو التسجيل أو أي خدمة جامعية. كيف أساعدك؟':'Welcome! 👋 I am an independent Dhofar University information assistant. Ask about majors, admission, registration or university services. How can I help?')}
+function setLang(code){lang=code;document.documentElement.lang=code;document.documentElement.dir=code==='ar'?'rtl':'ltr';document.querySelectorAll('[data-i18n]').forEach(el=>{const val=labels[code][el.dataset.i18n];if(!val)return;if(el.dataset.i18n==='heroTitle')el.innerHTML=val;else el.textContent=val});document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>el.placeholder=labels[code][el.dataset.i18nPlaceholder]);$('#langBtn').innerHTML=code==='ar'?'English <span>🌐</span>':'العربية <span>🌐</span>';$('#chatStatus').textContent=CONFIG.API_URL?'● Gemini AI':code==='ar'?'● الأسئلة الشائعة · متاح':'● FAQ Mode · Available';greet()}
+$('#langBtn').addEventListener('click',()=>setLang(lang==='ar'?'en':'ar'));$('#clearChat').addEventListener('click',greet);$('#chatForm').addEventListener('submit',e=>{e.preventDefault();const input=$('#messageInput');const q=input.value.trim();if(!q)return;input.value='';ask(q)});document.querySelectorAll('[data-topic]').forEach(el=>el.addEventListener('click',()=>{const topic=el.dataset.topic;document.getElementById('assistant').scrollIntoView({behavior:'smooth'});ask(labels[lang][topic==='programs'?'prompt1':topic==='dates'?'prompt2':topic==='fees'?'prompt3':({admissions:'topicAdmission',foundation:'topicFoundation',contacts:'topicContacts'}[topic])],topic)}));setLang('ar');
